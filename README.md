@@ -1,3 +1,37 @@
+# Modified 
+
+PoC on migrating from `Pulp2` to `Pulp3`:
+- legacy `rpm` repositories for each architecture at `yum/nordvpn`
+- legacy `deb` repository for all architectures ar `deb/nordvpn`
+- after migraton need to be exactly the same URLs!
+
+Need to modify `nginx.conf` - see `images/s6_assets/nginx.conf`
+
+Then need to create `deb` and `rpm` repositories and corresponding 
+distributions with `base_path`, e.g.:
+
+```
+pulp deb repository create --name=deb22
+pulp deb content upload --repository=deb22 --file=nordvpn_3.16.8_amd64.deb
+pulp deb publication create --repository=deb22 --structured
+pulp deb distribution create --name=distro22 --base-path='deb/nordvpn/mydeb22' --repository=deb22
+
+
+pulp rpm repository create --name=rpm22
+pulp rpm content upload --repository=rpm22 --file=nordvpn-3.16.9-1.aarch64.rpm
+pulp rpm publication create --repository=rpm22
+pulp rpm distribution create --name=distro23 --base-path='yum/nordvpn/myrpm22' --repository=rpm22
+```
+
+Then URLs will be as follows:
+- http://localhost:8080/deb/nordvpn/mydeb22
+- http://localhost:8080/yum/nordvpn/myrpm22  
+  
+#
+Use script `build-pulp-oci-image.sh` to locally rebuild pulp OCI image.
+
+#
+
 # Pulp 3 Containers
 
 The [pulp-oci-images](https://github.com/pulp/pulp-oci-images) repository is used to provide container images for running Pulp.
